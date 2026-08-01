@@ -61,8 +61,10 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('send_message', ({ room, message, sender }) => {
-    io.to(room).emit('receive_message', { message, sender, timestamp: new Date() });
+  // Broadcast the message with the original sender's socket id, so every
+  // connected client (including the sender) can tell who sent it.
+  socket.on('send_message', ({ room, message, senderId }) => {
+    io.to(room).emit('receive_message', { message, senderId, timestamp: new Date() });
   });
 
   socket.on('disconnect', () => {

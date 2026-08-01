@@ -5,7 +5,8 @@ import { onAuthStateChanged } from 'firebase/auth';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const socket = io('http://localhost:5000');
+const BACKEND = 'http://162.55.210.253:5000';
+const socket = io(BACKEND);
 const TOTAL_SECS = 15 * 60;
 
 export default function Chat() {
@@ -27,6 +28,7 @@ export default function Chat() {
 
   useEffect(() => {
     socket.on('matched', ({ room }) => { setRoom(room); setSearching(false); });
+    // Only listen to messages coming from the server — do not add locally on send
     socket.on('receive_message', (msg) => setMessages(prev => [...prev, msg]));
     socket.on('session_prompt', ({ prompt }) => setPrompt(prompt));
     return () => { socket.off('matched'); socket.off('receive_message'); socket.off('session_prompt'); };
@@ -46,15 +48,15 @@ export default function Chat() {
     if (!user) return;
     setSearching(true);
     try {
-      const { data } = await axios.get(`http://localhost:5000/api/auth/profile/${user.uid}`);
+      const { data } = await axios.get(`${BACKEND}/api/auth/profile/${user.uid}`);
       socket.emit('find_match', { userId: user.uid, nativeLanguage: data.nativeLanguage, targetLanguage: data.targetLanguage, proficiencyLevel: data.proficiencyLevel });
     } catch { setSearching(false); alert('Could not load your profile. Please go back and save your language settings.'); }
   };
 
   const sendMessage = () => {
     if (!input.trim() || !room) return;
-    socket.emit('send_message', { room, message: input, sender: 'You' });
-    setMessages(prev => [...prev, { message: input, sender: 'You' }]);
+    // Send with our own socket id so every client can tell who sent it
+    socket.emit('send_message', { room, message: input, senderId: socket.id });
     setInput('');
   };
 
@@ -90,13 +92,16 @@ export default function Chat() {
             </div>
           )}
           <div style={{ border: '1px solid #333', height: 320, overflowY: 'auto', padding: 12, borderRadius: 6, background: '#111' }}>
-            {messages.map((m, i) => (
-              <div key={i} style={{ marginBottom: 10, textAlign: m.sender === 'You' ? 'right' : 'left' }}>
-                <span style={{ background: m.sender === 'You' ? '#4A90E2' : '#2a2a2a', color: '#fff', padding: '8px 14px', borderRadius: 16, display: 'inline-block', maxWidth: '75%' }}>
-                  {m.message}
-                </span>
-              </div>
-            ))}
+            {messages.map((m, i) => {
+              const isMine = m.senderId === socket.id;
+              return (
+                <div key={i} style={{ marginBottom: 10, textAlign: isMine ? 'right' : 'left' }}>
+                  <span style={{ background: isMine ? '#4A90E2' : '#2a2a2a', color: '#fff', padding: '8px 14px', borderRadius: 16, display: 'inline-block', maxWidth: '75%' }}>
+                    {m.message}
+                  </span>
+                </div>
+              );
+            })}
             <div ref={endRef} />
           </div>
           <div style={{ display: 'flex', marginTop: 10, gap: 8 }}>

@@ -4,6 +4,8 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'fire
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const BACKEND = 'http://162.55.210.253:5000';
+
 export default function Register() {
   const [mode, setMode] = useState('register');
   const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -16,7 +18,7 @@ export default function Register() {
     setLoading(true);
     try {
       const cred = await createUserWithEmailAndPassword(auth, form.email, form.password);
-      await axios.post('http://localhost:5000/api/auth/register', { name: form.name, email: form.email, firebaseUid: cred.user.uid });
+      await axios.post(`${BACKEND}/api/auth/register`, { name: form.name, email: form.email, firebaseUid: cred.user.uid });
       navigate('/profile');
     } catch (err) { setMessage(err.response?.data?.error || err.message || 'Something went wrong.'); }
     setLoading(false);

@@ -4,6 +4,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const BACKEND = 'http://162.55.210.253:5000';
 const LANGUAGES = ['English', 'Portuguese', 'Spanish', 'French', 'German', 'Italian', 'Mandarin', 'Japanese', 'Korean', 'Arabic'];
 const LEVELS = ['beginner', 'intermediate', 'advanced'];
 
@@ -23,7 +24,7 @@ export default function Profile() {
     if (!form.nativeLanguage || !form.targetLanguage) { setMessage('Please select both languages.'); return; }
     if (form.nativeLanguage === form.targetLanguage) { setMessage('Native and target language cannot be the same.'); return; }
     try {
-      await axios.put(`http://localhost:5000/api/auth/profile/${user.uid}`, form);
+      await axios.put(`${BACKEND}/api/auth/profile/${user.uid}`, form);
       setSaved(true);
       setTimeout(() => navigate('/chat'), 800);
     } catch { setMessage('Could not save profile. Please try again.'); }
