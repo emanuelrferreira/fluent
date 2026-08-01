@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 
-// POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
     const { name, email, firebaseUid } = req.body;
@@ -11,12 +10,17 @@ router.post('/register', async (req, res) => {
     const user = new User({ name, email, firebaseUid });
     await user.save();
     res.status(201).json({ message: 'User created', user });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// PUT /api/auth/profile/:uid
+router.get('/profile/:uid', async (req, res) => {
+  try {
+    const user = await User.findOne({ firebaseUid: req.params.uid });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 router.put('/profile/:uid', async (req, res) => {
   try {
     const { nativeLanguage, targetLanguage, proficiencyLevel } = req.body;
@@ -27,9 +31,7 @@ router.put('/profile/:uid', async (req, res) => {
     );
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ message: 'Profile updated', user });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 module.exports = router;
