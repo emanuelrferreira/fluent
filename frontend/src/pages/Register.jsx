@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'fire
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const BACKEND = 'http://162.55.210.253:5000';
+const BACKEND = 'https://162-55-210-253.nip.io';
 
 export default function Register() {
   const [mode, setMode] = useState('register');

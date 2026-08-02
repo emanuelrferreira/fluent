@@ -5,7 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const BACKEND = 'http://162.55.210.253:5000';
+const BACKEND = 'https://162-55-210-253.nip.io';
 const socket = io(BACKEND);
 const TOTAL_SECS = 15 * 60;
 
@@ -28,7 +28,6 @@ export default function Chat() {
 
   useEffect(() => {
     socket.on('matched', ({ room }) => { setRoom(room); setSearching(false); });
-    // Only listen to messages coming from the server — do not add locally on send
     socket.on('receive_message', (msg) => setMessages(prev => [...prev, msg]));
     socket.on('session_prompt', ({ prompt }) => setPrompt(prompt));
     return () => { socket.off('matched'); socket.off('receive_message'); socket.off('session_prompt'); };
@@ -55,7 +54,6 @@ export default function Chat() {
 
   const sendMessage = () => {
     if (!input.trim() || !room) return;
-    // Send with our own socket id so every client can tell who sent it
     socket.emit('send_message', { room, message: input, senderId: socket.id });
     setInput('');
   };

@@ -4,7 +4,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const BACKEND = 'http://162.55.210.253:5000';
+const BACKEND = 'https://162-55-210-253.nip.io';
 const LANGUAGES = ['English', 'Portuguese', 'Spanish', 'French', 'German', 'Italian', 'Mandarin', 'Japanese', 'Korean', 'Arabic'];
 const LEVELS = ['beginner', 'intermediate', 'advanced'];
 
